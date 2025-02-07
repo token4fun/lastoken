@@ -95,21 +95,24 @@ body::before {
 }
 
 /* Top Banner */
+/* Top Banner com dimensões fixas */
 #topBanner {
   width: 100%;
+  height: 200px; /* altura fixa - ajuste conforme necessário */
+  background-color: #000;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  margin-top: 70px; /* To avoid overlapping the ticker */
-  background-color: #000;
+  overflow: hidden; /* garante que partes excedentes da imagem sejam ocultadas */
 }
+
 #topBanner img {
-  width: 80%;
-  max-width: 80%;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* a imagem cobrirá o container mantendo a proporção */
   display: block;
 }
+
 
 /* Main Content Spacing */
 main {
