@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* SPLASH MODAL: Typewriter Effect */
   const splashModal = document.getElementById("splashModal");
   const splashTextElem = document.getElementById("splash-text");
-  const splashMessage = "Welcome to The Last Token\nThe Final Creation on Solana\nYour worries are over\nThis is the only token you'll ever need.\nReady to bond with Raydium?\nLet’s fucking defy $SHERK once and for all!";
+  const splashMessage = "Welcome to The Last Token\nThe Final Creation on Solana\nYour worries are over!\nThis is the only token you'll ever need.\nReady to bond with Raydium?\nLet’s fucking defy $SHERK once and for all!";
   let charIndex = 0;
   const typeDelay = 50;
   const fadeDelay = 3000;
