@@ -1,0 +1,419 @@
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  color: #e0e0e0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Background with animated GIF */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("images/background.gif") no-repeat center center fixed;
+  background-size: cover;
+  opacity: 0.8;
+  z-index: -2;
+}
+
+/* Crypto Ticker */
+#crypto-ticker {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 15px 0;
+  background: #111;
+  font-size: 20px;
+  text-align: center;
+  z-index: 1000;
+  color: #00eaff;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { text-shadow: 0 0 5px #00eaff; }
+  50% { text-shadow: 0 0 20px #00eaff; }
+  100% { text-shadow: 0 0 5px #00eaff; }
+}
+.negative { color: red; }
+.positive { color: #00eaff; }
+
+/* Floating Menu */
+#floating-menu {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 4px solid #00eaff;
+  border-radius: 8px;
+  z-index: 1200;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+#floating-menu:hover {
+  transform: scale(1.05);
+}
+#floating-menu .menu-button {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  color: #00eaff;
+}
+#floating-menu .menu-dropdown {
+  display: none;
+  list-style: none;
+  background: rgba(0, 0, 0, 0.95);
+  border-top: 1px solid #00eaff;
+}
+#floating-menu:hover .menu-dropdown {
+  display: block;
+  animation: fadeIn 0.3s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+#floating-menu .menu-dropdown li {
+  padding: 8px 15px;
+  text-align: right;
+}
+#floating-menu .menu-dropdown li a {
+  color: #00eaff;
+  text-decoration: none;
+  transition: color 0.3s, transform 0.3s;
+}
+#floating-menu .menu-dropdown li a:hover {
+  transform: scale(1.1);
+}
+
+/* Top Banner */
+#topBanner {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-top: 70px; /* To avoid overlapping the ticker */
+  background-color: #000;
+}
+#topBanner img {
+  width: 80%;
+  max-width: 80%;
+  height: auto;
+  display: block;
+}
+
+/* Main Content Spacing */
+main {
+  padding: 100px 0 100px 0;
+}
+
+/* Content Boxes */
+.content-box {
+  width: 80%;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 4px solid;
+  border-image: linear-gradient(45deg, #00eaff, #ff073a) 1;
+  border-radius: 15px;
+  transition: box-shadow 0.3s;
+}
+.content-box:hover {
+  box-shadow: 0 0 40px #ff073a;
+}
+.content-box ul {
+  list-style: none;
+  margin: 15px auto;
+  padding: 0;
+}
+.content-box ul li {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+/* Neon Headings (Blue and Red Neon) */
+.neon-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #00eaff;
+  text-shadow: 
+    0 0 5px #00eaff,
+    0 0 10px #00eaff,
+    0 0 20px #ff073a,
+    0 0 30px #ff073a;
+}
+
+/* Buttons */
+.button-highlightgame,
+.button {
+  display: inline-block;
+  padding: 14px 28px;
+  margin: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s, background 0.3s;
+  background: linear-gradient(45deg, #00eaff, #ff073a);
+  color: #000;
+  box-shadow: 0 0 15px #00eaff;
+}
+.button-highlightgame:hover,
+.button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px #ff073a;
+}
+a {
+  transition: color 0.3s, transform 0.3s;
+}
+a:hover {
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* Mini Cards (Tokenomics and Roadmap) */
+.mini-card-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.mini-card-grid::-webkit-scrollbar {
+  height: 10px;
+}
+.mini-card-grid::-webkit-scrollbar-thumb {
+  background: #434343;
+  border-radius: 10px;
+}
+.mini-card-grid::-webkit-scrollbar-track {
+  background: #262626;
+}
+.mini-card {
+  flex: 0 0 auto;
+  min-width: 150px;
+  min-height: 200px;
+  padding: 1rem;
+  border-radius: 16px;
+  background: linear-gradient(85deg, #434343, #262626);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: -1.5rem 0 2.5rem -1.5rem black;
+  scroll-snap-align: start;
+  position: relative;
+  z-index: 1;
+}
+.mini-card:hover,
+.mini-card:focus-within {
+  transform: translate(0, -1rem);
+  z-index: 20;
+}
+.mini-card-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* FAQ Section */
+.faq-section {
+  margin-top: 40px;
+  padding: 25px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 4px solid;
+  border-image: linear-gradient(45deg, #00eaff, #ff073a) 1;
+  border-radius: 15px;
+  box-shadow: 0 0 30px #ff073a;
+}
+.faq-section h2 {
+  margin-bottom: 20px;
+}
+.faq-item {
+  margin: 15px 0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 7, 58, 0.5);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.faq-item .faq-question {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #00eaff;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 5px;
+}
+.faq-item .faq-answer {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #e0e0e0;
+  display: none;
+  padding: 10px;
+  border-left: 3px solid #ff073a;
+  animation: fadeIn 0.5s ease-in-out;
+}
+.faq-item.active .faq-answer {
+  display: block;
+}
+
+/* Social Media Icons */
+.social-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin: 40px auto 20px;
+}
+.social-icons a img {
+  width: 40px;
+  height: auto;
+  filter: drop-shadow(0 0 10px #00eaff);
+  transition: filter 0.3s;
+}
+.social-icons a:hover img {
+  filter: drop-shadow(0 0 20px #ff073a);
+}
+
+/* Floating Telegram Button */
+#telegram-button {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: linear-gradient(45deg, #00eaff, #ff073a);
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 50px;
+  box-shadow: 0 0 15px #00eaff;
+  text-decoration: none;
+  font-weight: bold;
+  z-index: 1200;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+#telegram-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px #ff073a;
+}
+
+/* Splash Modal */
+#splashModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 1;
+  pointer-events: auto;
+}
+#splash-content {
+  text-align: center;
+}
+#splash-logo {
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+#splash-text {
+  font-size: 28px;
+  color: #00eaff;
+  text-shadow: 0 0 20px #00eaff, 0 0 40px #ff073a;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: pre-wrap;
+  text-align: center;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1300;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.85);
+}
+.modal-content {
+  background: #0d0d0d;
+  margin: 10% auto;
+  padding: 20px;
+  border: 4px solid;
+  border-image: linear-gradient(45deg, #00eaff, #ff073a) 1;
+  border-radius: 10px;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 0 30px #ff073a;
+}
+.modal-content h2 {
+  color: #00eaff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.modal-content input,
+.modal-content button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+.modal-content input {
+  border: 2px solid #00eaff;
+  background: #222;
+  color: #e0e0e0;
+}
+.modal-content button {
+  border: none;
+  background: #00eaff;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.modal-content button:hover {
+  background: #ff073a;
+}
+.close {
+  color: #00eaff;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  #floating-menu {
+    top: 10px;
+    right: 10px;
+  }
+  #floating-menu .menu-button {
+    font-size: 1rem;
+    padding: 8px 15px;
+  }
+  .button-highlightgame,
+  .button {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+}
