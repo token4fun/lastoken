@@ -1,5 +1,5 @@
-const contractAddress = "0x1234567890abcdef1234567890abcdef12345678"; // 🔥 Substitua pelo endereço real do contrato
-const apiKey = "SUA_API_BSCSCAN_AQUI";  // 🔥 Insira sua API Key da BSCScan
+const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // 🔥 Substitua pelo endereço real do contrato
+const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // 🔥 Insira sua API Key da BSCScan
 
 // ✅ Buscar dados do token automaticamente da BSCScan
 async function fetchTokenData() {
