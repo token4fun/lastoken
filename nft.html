@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mint Futuristic NFT</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        button {
+            background: neon;
+            border: 2px solid cyan;
+            padding: 15px;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+        }
+        #nft-image {
+            margin-top: 20px;
+            max-width: 300px;
+            border: 3px solid cyan;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Futuristic NFT Minting</h1>
+        <button onclick="connectWallet()">Conectar MetaMask</button>
+        <p id="wallet-address"></p>
+        <button onclick="mintNFT()">Mintar NFT (0.1 BNB)</button>
+        <p id="status"></p>
+        <img id="nft-image" src="" style="display:none;">
+    </div>
+
+    <script>
+        const contractAddress = "COLE_O_ENDEREÇO_DO_CONTRATO_AQUI";
+        const abi = [
+            {
+                "inputs": [],
+                "name": "mintNFT",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            }
+        ];
+
+        let web3;
+        let contract;
+        let accounts;
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                accounts = await web3.eth.getAccounts();
+                document.getElementById("wallet-address").innerText = "Wallet: " + accounts[0];
+                contract = new web3.eth.Contract(abi, contractAddress);
+            } else {
+                alert("MetaMask não está instalado!");
+            }
+        }
+
+        async function mintNFT() {
+            if (!contract || !accounts) {
+                alert("Conecte a MetaMask primeiro!");
+                return;
+            }
+
+            try {
+                document.getElementById("status").innerText = "Mintando NFT...";
+                const result = await contract.methods.mintNFT().send({
+                    from: accounts[0],
+                    value: web3.utils.toWei("0.1", "ether")
+                });
+
+                document.getElementById("status").innerText = "NFT Mintado! Token ID: " + result.events.Transfer.returnValues.tokenId;
+                
+                // Pega a imagem do NFT
+                const tokenURI = await contract.methods.tokenURI(result.events.Transfer.returnValues.tokenId).call();
+                const metadata = JSON.parse(atob(tokenURI.split(",")[1]));
+                document.getElementById("nft-image").src = metadata.image;
+                document.getElementById("nft-image").style.display = "block";
+            } catch (error) {
+                console.error(error);
+                document.getElementById("status").innerText = "Erro ao mintar NFT!";
+            }
+        }
+    </script>
+</body>
+</html>
