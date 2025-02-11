@@ -36,4 +36,4 @@ function formatNumber(num) {
 
 // Atualizar a cada 60 segundos
 fetchTopTokens();
-setInterval(fetchTopTokens, 60000);
+setInterval(fetchTopTokens, 6000);
