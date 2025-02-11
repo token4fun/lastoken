@@ -1,6 +1,6 @@
 const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // CakeMoon
 const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
-const apiKey = "SUA_API_KEY_DA_BSCSCAN";  // Insira sua API Key da BSCScan
+const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // Insira sua API Key da BSCScan
 const coingeckoId = "cake-moon"; // ID do token na CoinGecko (precisa ser o correto)
 
 // ✅ Buscar dados do token automaticamente
