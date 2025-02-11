@@ -1,93 +1,63 @@
-const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // CakeMoon
-const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
-const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // Insira sua API Key da BSCScan
-const geckoTerminalUrl = "https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x117c1dabb35ce89c7cb98a49e2355ab445366c23"; // GeckoTerminal
-
-let countdown = 30; // Tempo de atualização
-
 async function fetchTokenData() {
-    try {
-        // 🔹 Buscar dados do GeckoTerminal (Preço, Volume)
-        const geckoResponse = await fetch(geckoTerminalUrl);
-        const geckoData = await geckoResponse.json();
-
-        if (geckoData.data) {
-            const pool = geckoData.data.attributes;
-            const tokenPriceUSD = parseFloat(pool.base_token_price_usd);
-            
-            document.getElementById("tokenPrice").innerText = `$${tokenPriceUSD.toFixed(6)}`;
-            document.getElementById("volume24h").innerText = `$${parseFloat(pool.volume_usd.h24).toLocaleString()}`;
-
-            // 🔹 Converter para BNB e ETH
-            fetchPriceConversions(tokenPriceUSD);
-        }
-
-        // 🔹 Buscar Supply, Market Cap, Holders e Burned Tokens
-        fetchBscData();
-    } catch (error) {
-        console.error("Erro ao buscar dados do token:", error);
+    let contractAddress = document.getElementById("contractAddress").value.trim();
+    if (!contractAddress) {
+        alert("Por favor, insira um endereço de contrato válido!");
+        return;
     }
-}
 
-// ✅ Buscar Market Cap, Supply, Holders e Burned Tokens da BSCScan
-async function fetchBscData() {
+    const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ"; // Insira sua chave da BSCScan
+    const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
+
     try {
+        // 🔹 Buscar Total Supply e Circulating Supply
         const supplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${apiKey}`;
-        const holdersUrl = `https://api.bscscan.com/api?module=token&action=tokenholdercount&contractaddress=${contractAddress}&apikey=${apiKey}`;
         const burnBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${burnAddress}&apikey=${apiKey}`;
-        
-        const [supplyResponse, holdersResponse, burnResponse] = await Promise.all([
+
+        const [supplyResponse, burnResponse] = await Promise.all([
             fetch(supplyUrl),
-            fetch(holdersUrl),
             fetch(burnBalanceUrl)
         ]);
 
         const supplyData = await supplyResponse.json();
-        const holdersData = await holdersResponse.json();
         const burnData = await burnResponse.json();
 
         if (supplyData.status === "1") {
-            const totalSupply = parseFloat(supplyData.result / 1e9);
-            const burnedTokens = parseFloat(burnData.result / 1e9);
+            const totalSupply = parseFloat(supplyData.result / 1e18);
+            const burnedTokens = parseFloat(burnData.result / 1e18);
             const circulatingSupply = totalSupply - burnedTokens;
 
             document.getElementById("totalSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("circulatingSupply").innerText = circulatingSupply.toLocaleString();
             document.getElementById("maxSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("burnedTokens").innerText = burnedTokens.toLocaleString();
+            document.getElementById("burnedPercentage").innerText = ((burnedTokens / totalSupply) * 100).toFixed(2) + "%";
 
-            const burnedPercentage = ((burnedTokens / totalSupply) * 100).toFixed(2);
-            document.getElementById("burnedPercentage").innerText = `${burnedPercentage}%`;
-
-            // 🔹 Buscar Preço para calcular Market Cap e FDV
-            fetchMarketCap(totalSupply, circulatingSupply);
-        }
-
-        if (holdersData.status === "1") {
-            document.getElementById("holders").innerText = parseInt(holdersData.result).toLocaleString();
+            // 🔹 Buscar Preço, Market Cap e Volume 24h
+            fetchGeckoData(contractAddress, totalSupply, circulatingSupply);
         }
     } catch (error) {
-        console.error("Erro ao buscar Supply, Holders e Burned Tokens:", error);
+        console.error("Erro ao buscar Supply e Burned Tokens:", error);
     }
 }
 
-// ✅ Contador regressivo para atualização dos dados
-function startCountdown() {
-    const countdownElement = document.getElementById("countdown");
+// ✅ Buscar Preço e Market Cap da CoinGecko
+async function fetchGeckoData(contractAddress, totalSupply, circulatingSupply) {
+    try {
+        const geckoUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`;
 
-    function updateCountdown() {
-        countdownElement.innerText = countdown;
-        countdown--;
+        const response = await fetch(geckoUrl);
+        const data = await response.json();
 
-        if (countdown < 0) {
-            countdown = 30;
-            fetchTokenData();
+        if (data[contractAddress.toLowerCase()]) {
+            const tokenPrice = parseFloat(data[contractAddress.toLowerCase()].usd);
+            const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
+            const volume24h = data[contractAddress.toLowerCase()].usd_24h_vol;
+
+            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
+            document.getElementById("marketCap").innerText = `$${marketCap}`;
+            document.getElementById("volume24h").innerText = `$${volume24h.toLocaleString()}`;
         }
+    } catch (error) {
+        console.error("Erro ao buscar Preço e Market Cap:", error);
     }
-
-    setInterval(updateCountdown, 1000);
 }
-
-// Iniciar contador e buscar os dados
-fetchTokenData();
-startCountdown();
