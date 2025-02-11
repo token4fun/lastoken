@@ -1,84 +1,76 @@
-const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // Endereço do token CakeMoon
+const contractAddress = "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c"; // CakeMoon
 const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // Insira sua API Key da BSCScan
-const geckoTerminalUrl = "https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x117c1dabb35ce89c7cb98a49e2355ab445366c23"; // URL do GeckoTerminal
+const geckoTerminalUrl = "https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x117c1dabb35ce89c7cb98a49e2355ab445366c23"; // GeckoTerminal
 
 async function fetchTokenData() {
     try {
-        // 🔹 Buscar dados do GeckoTerminal (Preço, Liquidez, Volume)
+        // 🔹 Buscar dados do GeckoTerminal
         const geckoResponse = await fetch(geckoTerminalUrl);
         const geckoData = await geckoResponse.json();
-        
+
         if (geckoData.data) {
             const pool = geckoData.data.attributes;
-            document.getElementById("tokenPrice").innerText = `$${parseFloat(pool.base_token_price_usd).toFixed(6)}`;
-            document.getElementById("liquidity").innerText = `$${parseFloat(pool.reserve_in_usd).toLocaleString()}`;
             document.getElementById("volume24h").innerText = `$${parseFloat(pool.volume_usd.h24).toLocaleString()}`;
         }
 
-        // 🔹 Buscar Market Cap e Holders da BSCScan
-        fetchMarketCap();
-        fetchHolders();
-        fetchTransactions();
+        // 🔹 Buscar Supply, Market Cap e Holders
+        fetchBscData();
     } catch (error) {
         console.error("Erro ao buscar dados do token:", error);
     }
 }
 
-// ✅ Buscar Market Cap (Supply Circulante x Preço)
-async function fetchMarketCap() {
+// ✅ Buscar Market Cap, Supply e Holders da BSCScan
+async function fetchBscData() {
     try {
         const supplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${apiKey}`;
-        const response = await fetch(supplyUrl);
-        const data = await response.json();
+        const holdersUrl = `https://api.bscscan.com/api?module=token&action=tokenholdercount&contractaddress=${contractAddress}&apikey=${apiKey}`;
+        
+        const [supplyResponse, holdersResponse] = await Promise.all([
+            fetch(supplyUrl),
+            fetch(holdersUrl)
+        ]);
 
-        if (data.status === "1") {
-            const totalSupply = parseFloat(data.result / 1e9);
-            const price = parseFloat(document.getElementById("tokenPrice").innerText.replace("$", ""));
-            const marketCap = (totalSupply * price).toFixed(2);
+        const supplyData = await supplyResponse.json();
+        const holdersData = await holdersResponse.json();
+
+        if (supplyData.status === "1") {
+            const totalSupply = parseFloat(supplyData.result / 1e9);
+            const circulatingSupply = totalSupply * 0.9; // Exemplo de cálculo do circulating supply
+
+            document.getElementById("totalSupply").innerText = totalSupply.toLocaleString();
+            document.getElementById("circulatingSupply").innerText = circulatingSupply.toLocaleString();
+            document.getElementById("maxSupply").innerText = totalSupply.toLocaleString(); // Se não há max supply, usa o total
+
+            // 🔹 Buscar Preço para calcular Market Cap e FDV
+            fetchMarketCap(totalSupply, circulatingSupply);
+        }
+
+        if (holdersData.status === "1") {
+            document.getElementById("holders").innerText = parseInt(holdersData.result).toLocaleString();
+        }
+    } catch (error) {
+        console.error("Erro ao buscar Supply e Holders:", error);
+    }
+}
+
+// ✅ Buscar Market Cap e FDV (Fully Diluted Valuation)
+async function fetchMarketCap(totalSupply, circulatingSupply) {
+    try {
+        const priceUrl = `https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x117c1dabb35ce89c7cb98a49e2355ab445366c23`;
+        const priceResponse = await fetch(priceUrl);
+        const priceData = await priceResponse.json();
+
+        if (priceData.data) {
+            const tokenPrice = parseFloat(priceData.data.attributes.base_token_price_usd);
+            const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
+            const fdv = (totalSupply * tokenPrice).toFixed(2);
+
             document.getElementById("marketCap").innerText = `$${marketCap}`;
+            document.getElementById("fdv").innerText = `$${fdv}`;
         }
     } catch (error) {
-        console.error("Erro ao buscar Market Cap:", error);
-    }
-}
-
-// ✅ Buscar Holders (Removendo Carteira de Queima)
-async function fetchHolders() {
-    try {
-        const holdersUrl = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${contractAddress}&sort=desc&apikey=${apiKey}`;
-        const response = await fetch(holdersUrl);
-        const data = await response.json();
-
-        if (data.status === "1") {
-            const transactions = data.result.filter(tx => tx.to !== "0x000000000000000000000000000000000000dEaD").slice(0, 10);
-            let holderList = "";
-            transactions.forEach(tx => {
-                holderList += `<li>${tx.to.slice(0, 6)}...${tx.to.slice(-4)}: ${parseFloat(tx.value / 1e9).toFixed(2)} MOON</li>`;
-            });
-            document.getElementById("holderList").innerHTML = holderList;
-        }
-    } catch (error) {
-        console.error("Erro ao buscar Holders:", error);
-    }
-}
-
-// ✅ Buscar Últimas Transações
-async function fetchTransactions() {
-    try {
-        const txUrl = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${contractAddress}&sort=desc&apikey=${apiKey}`;
-        const response = await fetch(txUrl);
-        const data = await response.json();
-
-        if (data.status === "1") {
-            const transactions = data.result.slice(0, 10);
-            let transactionList = "";
-            transactions.forEach(tx => {
-                transactionList += `<li>De: ${tx.from.slice(0, 6)}...${tx.from.slice(-4)} → Para: ${tx.to.slice(0, 6)}...${tx.to.slice(-4)} | ${parseFloat(tx.value / 1e9).toFixed(2)} MOON</li>`;
-            });
-            document.getElementById("transactionList").innerHTML = transactionList;
-        }
-    } catch (error) {
-        console.error("Erro ao buscar transações:", error);
+        console.error("Erro ao buscar Market Cap e FDV:", error);
     }
 }
 
