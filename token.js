@@ -1,6 +1,7 @@
 const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // CakeMoon
 const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
-const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // 🔥 Insira sua API Key da BSCScan
+const apiKey = "SUA_API_KEY_DA_BSCSCAN";  // Insira sua API Key da BSCScan
+const coingeckoId = "cake-moon"; // ID do token na CoinGecko (precisa ser o correto)
 
 // ✅ Buscar dados do token automaticamente
 async function fetchTokenData() {
@@ -35,17 +36,17 @@ async function fetchTokenData() {
         const circulatingSupply = (totalSupply - burnedTokens).toFixed(2);
         document.getElementById("circulatingSupply").innerText = circulatingSupply;
 
-        // 🔹 Buscar preço do token
+        // 🔹 Buscar preço do token via CoinGecko
         fetchTokenPrice(circulatingSupply);
         
-        // 🔹 Buscar holders
+        // 🔹 Buscar holders (sem endereço de queima)
         fetchHolders();
     } catch (error) {
         console.error("Erro ao buscar dados do token:", error);
     }
 }
 
-// ✅ Buscar preço do token
+// ✅ Buscar preço do token via CoinGecko
 async function fetchTokenPrice(circulatingSupply) {
     const priceUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd`;
 
@@ -70,7 +71,7 @@ async function fetchTokenPrice(circulatingSupply) {
     }
 }
 
-// ✅ Buscar os **Top 10 Holders**
+// ✅ Buscar os **Top 10 Holders** (removendo a carteira de queima)
 async function fetchHolders() {
     const holdersUrl = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${contractAddress}&sort=desc&apikey=${apiKey}`;
 
@@ -79,7 +80,7 @@ async function fetchHolders() {
         const data = await response.json();
 
         if (data.status === "1") {
-            const transactions = data.result.slice(0, 10);
+            let transactions = data.result.filter(tx => tx.to !== burnAddress).slice(0, 10);
             let holderList = "";
             transactions.forEach(tx => {
                 holderList += `<li>${tx.to.slice(0, 6)}...${tx.to.slice(-4)}: ${parseFloat(tx.value / 1e9).toFixed(2)} MOON</li>`;
