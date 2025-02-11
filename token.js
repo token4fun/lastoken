@@ -5,55 +5,73 @@ async function fetchTokenData() {
         return;
     }
 
-    // 🔹 Resetar os dados na tela antes da nova busca
-    resetUI();
+    resetUI(); // Limpa os dados anteriores
 
     const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ"; // Insira sua chave da BSCScan
     const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
 
     try {
-        // 🔹 Buscar Total Supply
         const supplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${apiKey}`;
-        
-        // 🔹 Buscar Total Burned do Endereço Dead
         const burnBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${burnAddress}&apikey=${apiKey}`;
+        const holdersUrl = `https://api.bscscan.com/api?module=token&action=tokenholdercount&contractaddress=${contractAddress}&apikey=${apiKey}`;
 
-        const [supplyResponse, burnResponse] = await Promise.all([
+        const [supplyResponse, burnResponse, holdersResponse] = await Promise.all([
             fetch(supplyUrl),
-            fetch(burnBalanceUrl)
+            fetch(burnBalanceUrl),
+            fetch(holdersUrl)
         ]);
 
         const supplyData = await supplyResponse.json();
         const burnData = await burnResponse.json();
+        const holdersData = await holdersResponse.json();
 
         if (supplyData.status === "1" && burnData.status === "1") {
-            const totalSupply = parseFloat(supplyData.result / 1e18); // Convertendo de WEI
-            const burnedTokens = parseFloat(burnData.result / 1e18); // Convertendo de WEI
-            const circulatingSupply = totalSupply - burnedTokens; // Cálculo do Supply Circulante
-
+            const totalSupply = parseFloat(supplyData.result / 1e18);
+            const burnedTokens = parseFloat(burnData.result / 1e18);
+            const circulatingSupply = totalSupply - burnedTokens;
+            
             document.getElementById("totalSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("circulatingSupply").innerText = circulatingSupply.toLocaleString();
-            document.getElementById("maxSupply").innerText = totalSupply.toLocaleString();
+            document.getElementById("maxTotalSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("burnedTokens").innerText = burnedTokens.toLocaleString();
 
             const burnedPercentage = ((burnedTokens / totalSupply) * 100).toFixed(2);
             document.getElementById("burnedPercentage").innerText = `${burnedPercentage}%`;
-
-            // 🔹 Buscar Preço, Market Cap e Volume 24h
-            fetchGeckoData(contractAddress, totalSupply, circulatingSupply);
         }
+
+        if (holdersData.status === "1") {
+            document.getElementById("holders").innerText = parseInt(holdersData.result).toLocaleString();
+        }
+
+        // 🔹 Buscar Preço e Market Cap
+        fetchPriceData(contractAddress, circulatingSupply);
     } catch (error) {
-        console.error("Erro ao buscar Supply e Burned Tokens:", error);
+        console.error("Erro ao buscar dados da BSCScan:", error);
     }
 }
 
-// ✅ Função para buscar Preço e Market Cap na CoinGecko
-async function fetchGeckoData(contractAddress, totalSupply, circulatingSupply) {
+// ✅ Buscar Preço e Market Cap com fallback para CoinGecko e CoinMarketCap
+async function fetchPriceData(contractAddress, circulatingSupply) {
     try {
-        const geckoUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`;
+        let priceUrl = `https://api.bscscan.com/api?module=stats&action=tokenprice&contractaddress=${contractAddress}&apikey=SUA_API_KEY_DA_BSCSCAN`;
+        let response = await fetch(priceUrl);
+        let data = await response.json();
 
-        const response = await fetch(geckoUrl);
-        const data = await response.json();
+        if (data.status === "1" && data.result.ethusd) {
+            const tokenPrice = parseFloat(data.result.ethusd);
+            const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
+
+            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
+            document.getElementById("marketCap").innerText = `$${marketCap}`;
+            return;
+        }
+
+        console.log("Preço não encontrado na BSCScan, buscando na CoinGecko...");
+
+        // Fallback para CoinGecko
+        priceUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`;
+        response = await fetch(priceUrl);
+        data = await response.json();
 
         if (data[contractAddress.toLowerCase()]) {
             const tokenPrice = parseFloat(data[contractAddress.toLowerCase()].usd);
@@ -63,19 +81,35 @@ async function fetchGeckoData(contractAddress, totalSupply, circulatingSupply) {
             document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
             document.getElementById("marketCap").innerText = `$${marketCap}`;
             document.getElementById("volume24h").innerText = `$${volume24h.toLocaleString()}`;
+            return;
         }
+
+        console.log("Preço não encontrado na CoinGecko, buscando na CoinMarketCap...");
+
+        // Fallback para CoinMarketCap
+        priceUrl = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=TOKEN_SYMBOL&CMC_PRO_API_KEY=SUA_API_KEY_CMC`;
+        response = await fetch(priceUrl);
+        data = await response.json();
+
+        if (data.data && data.data.TOKEN_SYMBOL) {
+            const tokenPrice = parseFloat(data.data.TOKEN_SYMBOL.quote.USD.price);
+            const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
+            const volume24h = data.data.TOKEN_SYMBOL.quote.USD.volume_24h;
+
+            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
+            document.getElementById("marketCap").innerText = `$${marketCap}`;
+            document.getElementById("volume24h").innerText = `$${volume24h.toLocaleString()}`;
+            return;
+        }
+
+        console.log("Preço não encontrado em nenhuma API.");
     } catch (error) {
-        console.error("Erro ao buscar Preço e Market Cap:", error);
+        console.error("Erro ao buscar preço e Market Cap:", error);
     }
 }
 
 // ✅ Resetar UI antes de cada busca
 function resetUI() {
-    const ids = [
-        "tokenPrice", "marketCap", "volume24h", 
-        "burnedTokens", "burnedPercentage", 
-        "totalSupply", "circulatingSupply", "maxSupply"
-    ];
-    
+    const ids = ["tokenPrice", "marketCap", "volume24h", "burnedTokens", "burnedPercentage", "totalSupply", "circulatingSupply", "maxTotalSupply", "holders"];
     ids.forEach(id => document.getElementById(id).innerText = "-");
 }
