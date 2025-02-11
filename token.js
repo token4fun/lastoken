@@ -1,50 +1,76 @@
 const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // CakeMoon
-const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // Sua API Key da BSCScan
+const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
+const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // 🔥 Insira sua API Key da BSCScan
 
-// ✅ Buscar dados do token automaticamente da BSCScan
+// ✅ Buscar dados do token automaticamente
 async function fetchTokenData() {
     try {
-        // ✅ Buscar total supply (9 decimais)
+        // 🔹 Buscar total supply (9 decimais)
         const supplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${apiKey}`;
         const supplyResponse = await fetch(supplyUrl);
         const supplyData = await supplyResponse.json();
 
         let totalSupply = 0;
         if (supplyData.status === "1") {
-            totalSupply = parseFloat(supplyData.result / 1e9).toFixed(2);  // Convertendo de 9 decimais
+            totalSupply = parseFloat(supplyData.result / 1e9).toFixed(2);
             document.getElementById("totalSupply").innerText = totalSupply;
         } else {
-            document.getElementById("totalSupply").innerText = "Erro ao buscar supply.";
+            document.getElementById("totalSupply").innerText = "Erro ao buscar.";
         }
 
-        // ✅ Buscar preço do token via BSCScan
-        const priceUrl = `https://api.bscscan.com/api?module=stats&action=tokenprice&contractaddress=${contractAddress}&apikey=${apiKey}`;
-        const priceResponse = await fetch(priceUrl);
-        const priceData = await priceResponse.json();
+        // 🔹 Buscar saldo do endereço de queima
+        const burnBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${burnAddress}&apikey=${apiKey}`;
+        const burnBalanceResponse = await fetch(burnBalanceUrl);
+        const burnBalanceData = await burnBalanceResponse.json();
 
-        let tokenPrice = 0;
-        if (priceData.status === "1" && priceData.result.ethusd) {
-            tokenPrice = parseFloat(priceData.result.ethusd);
-            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
+        let burnedTokens = 0;
+        if (burnBalanceData.status === "1") {
+            burnedTokens = parseFloat(burnBalanceData.result / 1e9).toFixed(2);
+            document.getElementById("burnedTokens").innerText = burnedTokens;
         } else {
-            document.getElementById("tokenPrice").innerText = "Preço indisponível";
+            document.getElementById("burnedTokens").innerText = "Erro ao buscar.";
         }
 
-        // ✅ Calcular Market Cap (evitar erro se preço falhar)
-        if (tokenPrice > 0 && totalSupply > 0) {
-            document.getElementById("marketCap").innerText = `$${(tokenPrice * totalSupply).toFixed(2)}`;
-        } else {
-            document.getElementById("marketCap").innerText = "Market Cap Indisponível";
-        }
+        // 🔹 Calcular supply circulante
+        const circulatingSupply = (totalSupply - burnedTokens).toFixed(2);
+        document.getElementById("circulatingSupply").innerText = circulatingSupply;
 
-        // ✅ Buscar holders reais
+        // 🔹 Buscar preço do token
+        fetchTokenPrice(circulatingSupply);
+        
+        // 🔹 Buscar holders
         fetchHolders();
     } catch (error) {
         console.error("Erro ao buscar dados do token:", error);
     }
 }
 
-// ✅ Buscar os **Top 10 Holders** baseado nas últimas transações
+// ✅ Buscar preço do token
+async function fetchTokenPrice(circulatingSupply) {
+    const priceUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd`;
+
+    try {
+        const priceResponse = await fetch(priceUrl);
+        const priceData = await priceResponse.json();
+
+        let tokenPrice = 0;
+        if (priceData[contractAddress.toLowerCase()]) {
+            tokenPrice = parseFloat(priceData[contractAddress.toLowerCase()].usd);
+            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
+
+            // 🔹 Calcular Market Cap
+            const marketCap = (tokenPrice * circulatingSupply).toFixed(2);
+            document.getElementById("marketCap").innerText = `$${marketCap}`;
+        } else {
+            document.getElementById("tokenPrice").innerText = "Preço Indisponível";
+            document.getElementById("marketCap").innerText = "Market Cap Indisponível";
+        }
+    } catch (error) {
+        console.error("Erro ao buscar preço:", error);
+    }
+}
+
+// ✅ Buscar os **Top 10 Holders**
 async function fetchHolders() {
     const holdersUrl = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${contractAddress}&sort=desc&apikey=${apiKey}`;
 
