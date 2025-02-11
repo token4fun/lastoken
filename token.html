@@ -9,21 +9,49 @@
 </head>
 <body>
     <header>
-        <h1 id="tokenName">CakeMoon (MOON)</h1>
-        <p id="tokenSymbol">(BSC)</p>
+        <h1 id="tokenName">Carregando...</h1>
+        <img id="tokenImage" src="" alt="Token Logo" class="token-logo">
         <div class="buttons">
-            <a href="https://pancakeswap.finance" target="_blank" class="buy-btn">💰 Comprar Token</a>
+            <a id="tokenWebsite" href="#" target="_blank" class="buy-btn">🌐 Site Oficial</a>
+            <a id="tokenTwitter" href="#" target="_blank" class="buy-btn">🐦 Twitter</a>
+            <a id="tokenTelegram" href="#" target="_blank" class="buy-btn">📢 Telegram</a>
         </div>
     </header>
 
-    <section class="token-info">
+    <section class="market-info">
+        <div class="card">
+            <h2>Preço Atual</h2>
+            <p id="tokenPrice">Carregando...</p>
+        </div>
+        <div class="card">
+            <h2>Market Cap</h2>
+            <p id="marketCap">Carregando...</p>
+        </div>
+        <div class="card">
+            <h2>Volume 24h</h2>
+            <p id="volume24h">Carregando...</p>
+        </div>
+    </section>
+
+    <section class="price-info">
+        <div class="card">
+            <h2>24h Máximo</h2>
+            <p id="high24h">Carregando...</p>
+        </div>
+        <div class="card">
+            <h2>24h Mínimo</h2>
+            <p id="low24h">Carregando...</p>
+        </div>
+        <div class="card">
+            <h2>Variação 24h</h2>
+            <p id="change24h">Carregando...</p>
+        </div>
+    </section>
+
+    <section class="supply-info">
         <div class="card">
             <h2>Supply Total</h2>
             <p id="totalSupply">Carregando...</p>
-        </div>
-        <div class="card">
-            <h2>Tokens Queimados</h2>
-            <p id="burnedTokens">Carregando...</p>
         </div>
         <div class="card">
             <h2>Supply Circulante</h2>
@@ -31,20 +59,9 @@
         </div>
     </section>
 
-    <section class="market-info">
-        <div class="card">
-            <h2>Market Cap</h2>
-            <p id="marketCap">Carregando...</p>
-        </div>
-        <div class="card">
-            <h2>Preço Atual</h2>
-            <p id="tokenPrice">Carregando...</p>
-        </div>
-    </section>
-
-    <section class="holders">
-        <h2>Top Holders</h2>
-        <ul id="holderList">Carregando...</ul>
+    <section class="exchanges">
+        <h2>Listagens em Exchanges</h2>
+        <ul id="exchangeList">Carregando...</ul>
     </section>
 </body>
 </html>
