@@ -4,16 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Token Dashboard</title>
-    <link rel="stylesheet" href="token.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
-    <script defer src="token.js"></script>
+    <link rel="stylesheet" href="styles/token.css">
+    <script defer src="scripts/token.js"></script>
 </head>
 <body>
     <header>
-        <h1 id="tokenName">Loading...</h1>
-        <p id="tokenSymbol">...</p>
+        <h1 id="tokenName">Token Dashboard</h1>
+        <p id="tokenSymbol">(BSC)</p>
         <div class="buttons">
-            <button id="connectWallet">🔗 Conectar Wallet</button>
             <a href="https://pancakeswap.finance" target="_blank" class="buy-btn">💰 Comprar Token</a>
         </div>
     </header>
@@ -21,37 +19,21 @@
     <section class="token-info">
         <div class="card">
             <h2>Supply Total</h2>
-            <p id="totalSupply">...</p>
+            <p id="totalSupply">Carregando...</p>
         </div>
         <div class="card">
             <h2>Market Cap</h2>
-            <p id="marketCap">...</p>
+            <p id="marketCap">Carregando...</p>
         </div>
         <div class="card">
             <h2>Preço Atual</h2>
-            <p id="tokenPrice">...</p>
+            <p id="tokenPrice">Carregando...</p>
         </div>
-    </section>
-
-    <section class="chart">
-        <h2>Gráfico de Preço</h2>
-        <canvas id="priceChart"></canvas>
     </section>
 
     <section class="holders">
         <h2>Top Holders</h2>
         <ul id="holderList">Carregando...</ul>
     </section>
-
-    <script>
-        document.getElementById('connectWallet').addEventListener('click', async () => {
-            if (window.ethereum) {
-                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-                alert('Wallet conectada: ' + accounts[0]);
-            } else {
-                alert('MetaMask não detectado! Instale e tente novamente.');
-            }
-        });
-    </script>
 </body>
 </html>
