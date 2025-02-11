@@ -29,7 +29,7 @@ async function fetchTokenData() {
             const totalSupply = parseFloat(supplyData.result / 1e18);
             const burnedTokens = parseFloat(burnData.result / 1e18);
             const circulatingSupply = totalSupply - burnedTokens;
-            
+
             document.getElementById("totalSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("circulatingSupply").innerText = circulatingSupply.toLocaleString();
             document.getElementById("maxTotalSupply").innerText = totalSupply.toLocaleString();
@@ -57,54 +57,55 @@ async function fetchPriceData(contractAddress, circulatingSupply) {
         let response = await fetch(priceUrl);
         let data = await response.json();
 
+        let tokenPrice = null;
+
         if (data.status === "1" && data.result.ethusd) {
-            const tokenPrice = parseFloat(data.result.ethusd);
-            const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
+            tokenPrice = parseFloat(data.result.ethusd);
+        } else {
+            console.log("Preço não encontrado na BSCScan, buscando na CoinGecko...");
+            priceUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`;
+            response = await fetch(priceUrl);
+            data = await response.json();
 
-            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
-            document.getElementById("marketCap").innerText = `$${marketCap}`;
+            if (data[contractAddress.toLowerCase()]) {
+                tokenPrice = parseFloat(data[contractAddress.toLowerCase()].usd);
+                const volume24h = data[contractAddress.toLowerCase()].usd_24h_vol;
+                document.getElementById("volume24h").innerText = `$${volume24h.toLocaleString()}`;
+            }
+        }
+
+        if (!tokenPrice) {
+            console.log("Preço não encontrado na CoinGecko, buscando na CoinMarketCap...");
+            priceUrl = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=TOKEN_SYMBOL&CMC_PRO_API_KEY=SUA_API_KEY_CMC`;
+            response = await fetch(priceUrl);
+            data = await response.json();
+
+            if (data.data && data.data.TOKEN_SYMBOL) {
+                tokenPrice = parseFloat(data.data.TOKEN_SYMBOL.quote.USD.price);
+                const volume24h = data.data.TOKEN_SYMBOL.quote.USD.volume_24h;
+                document.getElementById("volume24h").innerText = `$${volume24h.toLocaleString()}`;
+            }
+        }
+
+        if (!tokenPrice) {
+            console.log("Preço não encontrado em nenhuma API.");
+            document.getElementById("tokenPrice").innerText = "N/A";
+            document.getElementById("marketCap").innerText = "N/A";
             return;
         }
 
-        console.log("Preço não encontrado na BSCScan, buscando na CoinGecko...");
+        document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
 
-        // Fallback para CoinGecko
-        priceUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`;
-        response = await fetch(priceUrl);
-        data = await response.json();
-
-        if (data[contractAddress.toLowerCase()]) {
-            const tokenPrice = parseFloat(data[contractAddress.toLowerCase()].usd);
+        if (circulatingSupply > 0) {
             const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
-            const volume24h = data[contractAddress.toLowerCase()].usd_24h_vol;
-
-            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
             document.getElementById("marketCap").innerText = `$${marketCap}`;
-            document.getElementById("volume24h").innerText = `$${volume24h.toLocaleString()}`;
-            return;
+        } else {
+            document.getElementById("marketCap").innerText = "N/A";
         }
-
-        console.log("Preço não encontrado na CoinGecko, buscando na CoinMarketCap...");
-
-        // Fallback para CoinMarketCap
-        priceUrl = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=TOKEN_SYMBOL&CMC_PRO_API_KEY=SUA_API_KEY_CMC`;
-        response = await fetch(priceUrl);
-        data = await response.json();
-
-        if (data.data && data.data.TOKEN_SYMBOL) {
-            const tokenPrice = parseFloat(data.data.TOKEN_SYMBOL.quote.USD.price);
-            const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
-            const volume24h = data.data.TOKEN_SYMBOL.quote.USD.volume_24h;
-
-            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
-            document.getElementById("marketCap").innerText = `$${marketCap}`;
-            document.getElementById("volume24h").innerText = `$${volume24h.toLocaleString()}`;
-            return;
-        }
-
-        console.log("Preço não encontrado em nenhuma API.");
     } catch (error) {
         console.error("Erro ao buscar preço e Market Cap:", error);
+        document.getElementById("tokenPrice").innerText = "N/A";
+        document.getElementById("marketCap").innerText = "N/A";
     }
 }
 
