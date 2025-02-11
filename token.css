@@ -5,124 +5,43 @@ body {
     background-color: #050A30;
     color: #00ccff;
     text-align: center;
-    padding: 20px;
-    overflow-x: hidden;
 }
 
-/* 🔹 Header com Glow */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding: 20px;
     background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(0, 0, 255, 0.5));
-    border-radius: 10px;
     box-shadow: 0 0 15px #00ccff;
-    animation: glow-fade 2s infinite alternate;
 }
 
-@keyframes glow-fade {
-    0% { box-shadow: 0 0 10px #00ccff; }
-    100% { box-shadow: 0 0 25px #00ccff; }
+.token-logo {
+    width: 80px;
+    margin: 10px auto;
 }
 
-/* 🔹 Botões Neon */
 .buttons {
     display: flex;
-    gap: 10px;
+    justify-content: center;
+    gap: 15px;
 }
 
 .buy-btn {
     background: #00ccff;
-    color: black;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 5px;
-    text-decoration: none;
     font-weight: bold;
-    box-shadow: 0 0 15px #00ccff;
-    transition: transform 0.3s ease-in-out;
+    text-decoration: none;
 }
 
-.buy-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 25px #00ccff;
-}
-
-/* 🔹 Seções Token Info e Market Info */
-.token-info, .market-info {
+.market-info, .price-info, .supply-info {
     display: flex;
     justify-content: center;
     gap: 20px;
-    flex-wrap: wrap;
     margin-top: 20px;
 }
 
-/* 🔹 Cartões de informações do Token */
 .card {
     background: rgba(0, 255, 255, 0.1);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 15px #00ccff;
-    width: 250px;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
-
-.card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 30px #00ccff;
-}
-
-/* 🔹 Animação de Glow pulsante no texto */
-h1, h2, p {
-    text-shadow: 0 0 10px #00ccff, 0 0 20px #00ccff;
-    animation: glow-text 1.5s infinite alternate;
-}
-
-@keyframes glow-text {
-    0% { text-shadow: 0 0 10px #00ccff; }
-    100% { text-shadow: 0 0 25px #00ccff; }
-}
-
-/* 🔹 Lista de Holders */
-.holders {
-    margin-top: 20px;
-    padding: 20px;
-    background: rgba(0, 255, 255, 0.2);
-    border-radius: 10px;
-    box-shadow: 0 0 15px #00ccff;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-}
-
-/* 🔹 Efeito de fundo neon animado */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 0, 255, 0.1) 100%);
-    z-index: -1;
-    animation: neon-bg 5s infinite alternate;
-}
-
-@keyframes neon-bg {
-    0% { filter: blur(5px) brightness(1.2); }
-    100% { filter: blur(10px) brightness(1.5); }
-}
-
-/* 🔹 Responsividade para telas menores */
-@media (max-width: 768px) {
-    .token-info, .market-info {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .card {
-        width: 90%;
-    }
 }
