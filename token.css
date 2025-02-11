@@ -80,16 +80,6 @@ h1, h2, p {
     100% { text-shadow: 0 0 25px #00ccff; }
 }
 
-/* 🔹 Efeito de Neon Girando */
-.neon-glow {
-    animation: rotate-glow 5s linear infinite;
-}
-
-@keyframes rotate-glow {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 /* 🔹 Lista de Holders */
 .holders {
     margin-top: 20px;
@@ -104,7 +94,7 @@ ul {
     padding: 0;
 }
 
-/* 🔹 Adicionando um efeito neon de fundo animado */
+/* 🔹 Efeito de fundo neon animado */
 body::before {
     content: "";
     position: fixed;
