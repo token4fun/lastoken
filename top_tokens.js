@@ -1,4 +1,4 @@
-let countdown = 5; // Tempo inicial do contador
+let countdown = 300; // 5 minutos em segundos
 
 async function fetchTopTokens() {
     try {
@@ -45,7 +45,7 @@ function startCountdown() {
         countdown--;
 
         if (countdown < 0) {
-            countdown = 5; // Reinicia o contador
+            countdown = 300; // Reinicia o contador para 5 minutos
             fetchTopTokens();
         }
     }
