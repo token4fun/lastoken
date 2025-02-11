@@ -31,3 +31,20 @@ header {
 ul {
     list-style: none;
 }
+/* 🔹 Adicionando um efeito neon de fundo animado */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 0, 255, 0.1) 100%);
+    z-index: -1;
+    animation: neon-bg 5s infinite alternate;
+}
+
+@keyframes neon-bg {
+    0% { filter: blur(5px) brightness(1.2); }
+    100% { filter: blur(10px) brightness(1.5); }
+}
