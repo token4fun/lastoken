@@ -1,36 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
 body {
-    font-family: 'Orbitron', sans-serif;
-    background-color: #050A30;
-    color: #00ccff;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
     text-align: center;
+    padding: 20px;
 }
 
 header {
-    padding: 20px;
-    background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(0, 0, 255, 0.5));
-    box-shadow: 0 0 15px #00ccff;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 0;
 }
 
-.market-info, .holders, .transactions {
+.buttons .buy-btn {
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.token-info {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
     margin-top: 20px;
 }
 
 .card {
-    background: rgba(0, 255, 255, 0.1);
+    background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 15px #00ccff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
 }
 
-ul {
-    list-style: none;
-}
 /* 🔹 Adicionando um efeito neon de fundo animado */
 body::before {
     content: "";
