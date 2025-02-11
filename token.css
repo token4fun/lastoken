@@ -1,20 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #0a0a0a;
+    font-family: 'Orbitron', sans-serif;
+    background-color: #050A30;
     color: #00ccff;
     text-align: center;
     padding: 20px;
+    overflow-x: hidden;
 }
 
+/* 🔹 Header com Glow */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: rgba(0, 255, 255, 0.2);
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(0, 0, 255, 0.5));
     border-radius: 10px;
+    box-shadow: 0 0 15px #00ccff;
+    animation: glow-fade 2s infinite alternate;
 }
 
+@keyframes glow-fade {
+    0% { box-shadow: 0 0 10px #00ccff; }
+    100% { box-shadow: 0 0 25px #00ccff; }
+}
+
+/* 🔹 Botões Neon */
 .buttons {
     display: flex;
     gap: 10px;
@@ -23,11 +35,20 @@ header {
 .buy-btn {
     background: #00ccff;
     color: black;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 5px;
     text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 0 15px #00ccff;
+    transition: transform 0.3s ease-in-out;
 }
 
+.buy-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #00ccff;
+}
+
+/* 🔹 Cartões de informações do Token */
 .token-info {
     display: flex;
     justify-content: center;
@@ -36,19 +57,67 @@ header {
 }
 
 .card {
-    background: rgba(0, 255, 255, 0.2);
+    background: rgba(0, 255, 255, 0.1);
     padding: 20px;
     border-radius: 10px;
+    box-shadow: 0 0 15px #00ccff;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
-.chart {
-    margin-top: 20px;
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #00ccff;
 }
 
+/* 🔹 Animação de Glow pulsante no texto */
+h1, h2, p {
+    text-shadow: 0 0 10px #00ccff, 0 0 20px #00ccff;
+    animation: glow-text 1.5s infinite alternate;
+}
+
+@keyframes glow-text {
+    0% { text-shadow: 0 0 10px #00ccff; }
+    100% { text-shadow: 0 0 25px #00ccff; }
+}
+
+/* 🔹 Efeito de Neon Girando */
+.neon-glow {
+    animation: rotate-glow 5s linear infinite;
+}
+
+@keyframes rotate-glow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 🔹 Lista de Holders */
 .holders {
     margin-top: 20px;
+    padding: 20px;
+    background: rgba(0, 255, 255, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 0 15px #00ccff;
 }
 
 ul {
     list-style: none;
+    padding: 0;
+}
+
+/* 🔹 Adicionando um efeito neon de fundo animado */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 0, 255, 0.1) 100%);
+    z-index: -1;
+    animation: neon-bg 5s infinite alternate;
+}
+
+@keyframes neon-bg {
+    0% { filter: blur(5px) brightness(1.2); }
+    100% { filter: blur(10px) brightness(1.5); }
 }
