@@ -1,97 +1,51 @@
-const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // CakeMoon
-const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
-const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // Insira sua API Key da BSCScan
-const coingeckoId = "cake-moon"; // ID do token na CoinGecko (precisa ser o correto)
+const coingeckoId = "cake-moon"; // Substitua pelo ID correto na CoinGecko
 
-// ✅ Buscar dados do token automaticamente
 async function fetchTokenData() {
     try {
-        // 🔹 Buscar total supply (9 decimais)
-        const supplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${apiKey}`;
-        const supplyResponse = await fetch(supplyUrl);
-        const supplyData = await supplyResponse.json();
+        const url = `https://api.coingecko.com/api/v3/coins/${coingeckoId}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-        let totalSupply = 0;
-        if (supplyData.status === "1") {
-            totalSupply = parseFloat(supplyData.result / 1e9).toFixed(2);
-            document.getElementById("totalSupply").innerText = totalSupply;
-        } else {
-            document.getElementById("totalSupply").innerText = "Erro ao buscar.";
-        }
+        // 🔹 Nome e Imagem do Token
+        document.getElementById("tokenName").innerText = data.name + " (" + data.symbol.toUpperCase() + ")";
+        document.getElementById("tokenImage").src = data.image.large;
 
-        // 🔹 Buscar saldo do endereço de queima
-        const burnBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${burnAddress}&apikey=${apiKey}`;
-        const burnBalanceResponse = await fetch(burnBalanceUrl);
-        const burnBalanceData = await burnBalanceResponse.json();
+        // 🔹 Links Oficiais
+        document.getElementById("tokenWebsite").href = data.links.homepage[0] || "#";
+        document.getElementById("tokenTwitter").href = "https://twitter.com/" + data.links.twitter_screen_name || "#";
+        document.getElementById("tokenTelegram").href = data.links.telegram_channel_identifier ? `https://t.me/${data.links.telegram_channel_identifier}` : "#";
 
-        let burnedTokens = 0;
-        if (burnBalanceData.status === "1") {
-            burnedTokens = parseFloat(burnBalanceData.result / 1e9).toFixed(2);
-            document.getElementById("burnedTokens").innerText = burnedTokens;
-        } else {
-            document.getElementById("burnedTokens").innerText = "Erro ao buscar.";
-        }
+        // 🔹 Preço e Market Cap
+        document.getElementById("tokenPrice").innerText = `$${data.market_data.current_price.usd.toFixed(6)}`;
+        document.getElementById("marketCap").innerText = `$${data.market_data.market_cap.usd.toLocaleString()}`;
+        document.getElementById("volume24h").innerText = `$${data.market_data.total_volume.usd.toLocaleString()}`;
 
-        // 🔹 Calcular supply circulante
-        const circulatingSupply = (totalSupply - burnedTokens).toFixed(2);
-        document.getElementById("circulatingSupply").innerText = circulatingSupply;
+        // 🔹 Variação de Preço e Máximos/Mínimos
+        document.getElementById("high24h").innerText = `$${data.market_data.high_24h.usd.toFixed(6)}`;
+        document.getElementById("low24h").innerText = `$${data.market_data.low_24h.usd.toFixed(6)}`;
+        document.getElementById("change24h").innerText = `${data.market_data.price_change_percentage_24h.toFixed(2)}%`;
 
-        // 🔹 Buscar preço do token via CoinGecko
-        fetchTokenPrice(circulatingSupply);
-        
-        // 🔹 Buscar holders (sem endereço de queima)
-        fetchHolders();
+        // 🔹 Supply Total e Circulante
+        document.getElementById("totalSupply").innerText = data.market_data.total_supply.toLocaleString();
+        document.getElementById("circulatingSupply").innerText = data.market_data.circulating_supply.toLocaleString();
+
+        // 🔹 Exchanges Listadas
+        fetchExchangeListings(data.tickers);
     } catch (error) {
         console.error("Erro ao buscar dados do token:", error);
     }
 }
 
-// ✅ Buscar preço do token via CoinGecko
-async function fetchTokenPrice(circulatingSupply) {
-    const priceUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd`;
+// ✅ Buscar exchanges onde o token está listado
+function fetchExchangeListings(tickers) {
+    let exchangeList = document.getElementById("exchangeList");
+    exchangeList.innerHTML = ""; 
 
-    try {
-        const priceResponse = await fetch(priceUrl);
-        const priceData = await priceResponse.json();
-
-        let tokenPrice = 0;
-        if (priceData[contractAddress.toLowerCase()]) {
-            tokenPrice = parseFloat(priceData[contractAddress.toLowerCase()].usd);
-            document.getElementById("tokenPrice").innerText = `$${tokenPrice.toFixed(6)}`;
-
-            // 🔹 Calcular Market Cap
-            const marketCap = (tokenPrice * circulatingSupply).toFixed(2);
-            document.getElementById("marketCap").innerText = `$${marketCap}`;
-        } else {
-            document.getElementById("tokenPrice").innerText = "Preço Indisponível";
-            document.getElementById("marketCap").innerText = "Market Cap Indisponível";
-        }
-    } catch (error) {
-        console.error("Erro ao buscar preço:", error);
-    }
-}
-
-// ✅ Buscar os **Top 10 Holders** (removendo a carteira de queima)
-async function fetchHolders() {
-    const holdersUrl = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${contractAddress}&sort=desc&apikey=${apiKey}`;
-
-    try {
-        const response = await fetch(holdersUrl);
-        const data = await response.json();
-
-        if (data.status === "1") {
-            let transactions = data.result.filter(tx => tx.to !== burnAddress).slice(0, 10);
-            let holderList = "";
-            transactions.forEach(tx => {
-                holderList += `<li>${tx.to.slice(0, 6)}...${tx.to.slice(-4)}: ${parseFloat(tx.value / 1e9).toFixed(2)} MOON</li>`;
-            });
-            document.getElementById("holderList").innerHTML = holderList;
-        } else {
-            document.getElementById("holderList").innerText = "Erro ao buscar holders.";
-        }
-    } catch (error) {
-        console.error("Erro ao buscar holders:", error);
-    }
+    tickers.slice(0, 10).forEach(ticker => {
+        let listItem = document.createElement("li");
+        listItem.innerHTML = `<a href="https://www.coingecko.com/en/exchanges/${ticker.market.identifier}" target="_blank">${ticker.market.name}</a>`;
+        exchangeList.appendChild(listItem);
+    });
 }
 
 // ✅ Atualizar dados ao carregar a página
