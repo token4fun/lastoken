@@ -15,6 +15,17 @@ header {
     border-radius: 10px;
 }
 
+header p {
+    font-size: 18px;
+    margin-top: 5px;
+    color: #ffcc00;
+}
+
+#countdown {
+    font-weight: bold;
+    color: #ff5733;
+}
+
 table {
     width: 90%;
     margin: 20px auto;
