@@ -1,4 +1,4 @@
-const coingeckoId = "cake-moon"; // Substitua pelo ID correto na CoinGecko
+const coingeckoId = "moon"; // Substitua pelo ID correto na CoinGecko
 
 async function fetchTokenData() {
     try {
