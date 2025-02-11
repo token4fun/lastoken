@@ -5,6 +5,9 @@ async function fetchTokenData() {
         return;
     }
 
+    // 🔹 Resetar os dados na tela antes da nova busca
+    resetUI();
+
     const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ"; // Insira sua chave da BSCScan
     const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
 
@@ -44,7 +47,7 @@ async function fetchTokenData() {
     }
 }
 
-// ✅ Buscar Preço e Market Cap da CoinGecko
+// ✅ Função para buscar Preço e Market Cap na CoinGecko
 async function fetchGeckoData(contractAddress, totalSupply, circulatingSupply) {
     try {
         const geckoUrl = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${contractAddress}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`;
@@ -64,4 +67,15 @@ async function fetchGeckoData(contractAddress, totalSupply, circulatingSupply) {
     } catch (error) {
         console.error("Erro ao buscar Preço e Market Cap:", error);
     }
+}
+
+// ✅ Resetar UI antes de cada busca
+function resetUI() {
+    const ids = [
+        "tokenPrice", "marketCap", "volume24h", 
+        "burnedTokens", "burnedPercentage", 
+        "totalSupply", "circulatingSupply", "maxSupply"
+    ];
+    
+    ids.forEach(id => document.getElementById(id).innerText = "-");
 }
