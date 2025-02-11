@@ -1,6 +1,9 @@
 const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // CakeMoon
-const apiKey = "SUA_API_KEY_DA_BSCSCAN";  // Insira sua API Key da BSCScan
+const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
+const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // Insira sua API Key da BSCScan
 const geckoTerminalUrl = "https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x117c1dabb35ce89c7cb98a49e2355ab445366c23"; // GeckoTerminal
+
+let countdown = 30; // Tempo de atualização
 
 async function fetchTokenData() {
     try {
@@ -19,34 +22,42 @@ async function fetchTokenData() {
             fetchPriceConversions(tokenPriceUSD);
         }
 
-        // 🔹 Buscar Supply, Market Cap e Holders
+        // 🔹 Buscar Supply, Market Cap, Holders e Burned Tokens
         fetchBscData();
     } catch (error) {
         console.error("Erro ao buscar dados do token:", error);
     }
 }
 
-// ✅ Buscar Market Cap, Supply e Holders da BSCScan
+// ✅ Buscar Market Cap, Supply, Holders e Burned Tokens da BSCScan
 async function fetchBscData() {
     try {
         const supplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${apiKey}`;
         const holdersUrl = `https://api.bscscan.com/api?module=token&action=tokenholdercount&contractaddress=${contractAddress}&apikey=${apiKey}`;
+        const burnBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${burnAddress}&apikey=${apiKey}`;
         
-        const [supplyResponse, holdersResponse] = await Promise.all([
+        const [supplyResponse, holdersResponse, burnResponse] = await Promise.all([
             fetch(supplyUrl),
-            fetch(holdersUrl)
+            fetch(holdersUrl),
+            fetch(burnBalanceUrl)
         ]);
 
         const supplyData = await supplyResponse.json();
         const holdersData = await holdersResponse.json();
+        const burnData = await burnResponse.json();
 
         if (supplyData.status === "1") {
             const totalSupply = parseFloat(supplyData.result / 1e9);
-            const circulatingSupply = totalSupply * 0.9; // Exemplo de cálculo do circulating supply
+            const burnedTokens = parseFloat(burnData.result / 1e9);
+            const circulatingSupply = totalSupply - burnedTokens;
 
             document.getElementById("totalSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("circulatingSupply").innerText = circulatingSupply.toLocaleString();
-            document.getElementById("maxSupply").innerText = totalSupply.toLocaleString(); // Se não há max supply, usa o total
+            document.getElementById("maxSupply").innerText = totalSupply.toLocaleString();
+            document.getElementById("burnedTokens").innerText = burnedTokens.toLocaleString();
+
+            const burnedPercentage = ((burnedTokens / totalSupply) * 100).toFixed(2);
+            document.getElementById("burnedPercentage").innerText = `${burnedPercentage}%`;
 
             // 🔹 Buscar Preço para calcular Market Cap e FDV
             fetchMarketCap(totalSupply, circulatingSupply);
@@ -56,49 +67,27 @@ async function fetchBscData() {
             document.getElementById("holders").innerText = parseInt(holdersData.result).toLocaleString();
         }
     } catch (error) {
-        console.error("Erro ao buscar Supply e Holders:", error);
+        console.error("Erro ao buscar Supply, Holders e Burned Tokens:", error);
     }
 }
 
-// ✅ Buscar Market Cap e FDV (Fully Diluted Valuation)
-async function fetchMarketCap(totalSupply, circulatingSupply) {
-    try {
-        const priceUrl = geckoTerminalUrl;
-        const priceResponse = await fetch(priceUrl);
-        const priceData = await priceResponse.json();
+// ✅ Contador regressivo para atualização dos dados
+function startCountdown() {
+    const countdownElement = document.getElementById("countdown");
 
-        if (priceData.data) {
-            const tokenPrice = parseFloat(priceData.data.attributes.base_token_price_usd);
-            const marketCap = (circulatingSupply * tokenPrice).toFixed(2);
-            const fdv = (totalSupply * tokenPrice).toFixed(2);
+    function updateCountdown() {
+        countdownElement.innerText = countdown;
+        countdown--;
 
-            document.getElementById("marketCap").innerText = `$${marketCap}`;
-            document.getElementById("fdv").innerText = `$${fdv}`;
+        if (countdown < 0) {
+            countdown = 30;
+            fetchTokenData();
         }
-    } catch (error) {
-        console.error("Erro ao buscar Market Cap e FDV:", error);
     }
+
+    setInterval(updateCountdown, 1000);
 }
 
-// ✅ Converter o preço para BNB e ETH
-async function fetchPriceConversions(tokenPriceUSD) {
-    try {
-        const conversionUrl = "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin,ethereum&vs_currencies=usd";
-        const response = await fetch(conversionUrl);
-        const data = await response.json();
-
-        if (data) {
-            const bnbPrice = data.binancecoin.usd;
-            const ethPrice = data.ethereum.usd;
-
-            document.getElementById("tokenPriceBNB").innerText = `${(tokenPriceUSD / bnbPrice).toFixed(8)} BNB`;
-            document.getElementById("tokenPriceETH").innerText = `${(tokenPriceUSD / ethPrice).toFixed(8)} ETH`;
-        }
-    } catch (error) {
-        console.error("Erro ao converter preços:", error);
-    }
-}
-
-// Atualizar dados a cada 30 segundos
+// Iniciar contador e buscar os dados
 fetchTokenData();
-setInterval(fetchTokenData, 30000);
+startCountdown();
