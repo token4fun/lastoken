@@ -1,16 +1,22 @@
 const contractAddress = "0x893535ed1b5c6969e62a10babfed4f5ff8373278"; // CakeMoon
-const apiKey = "NABPG1J8DPTD6NMNU4WZIT4GCB258666UQ";  // Insira sua API Key da BSCScan
+const apiKey = "SUA_API_KEY_DA_BSCSCAN";  // Insira sua API Key da BSCScan
 const geckoTerminalUrl = "https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x117c1dabb35ce89c7cb98a49e2355ab445366c23"; // GeckoTerminal
 
 async function fetchTokenData() {
     try {
-        // 🔹 Buscar dados do GeckoTerminal
+        // 🔹 Buscar dados do GeckoTerminal (Preço, Volume)
         const geckoResponse = await fetch(geckoTerminalUrl);
         const geckoData = await geckoResponse.json();
 
         if (geckoData.data) {
             const pool = geckoData.data.attributes;
+            const tokenPriceUSD = parseFloat(pool.base_token_price_usd);
+            
+            document.getElementById("tokenPrice").innerText = `$${tokenPriceUSD.toFixed(6)}`;
             document.getElementById("volume24h").innerText = `$${parseFloat(pool.volume_usd.h24).toLocaleString()}`;
+
+            // 🔹 Converter para BNB e ETH
+            fetchPriceConversions(tokenPriceUSD);
         }
 
         // 🔹 Buscar Supply, Market Cap e Holders
@@ -57,7 +63,7 @@ async function fetchBscData() {
 // ✅ Buscar Market Cap e FDV (Fully Diluted Valuation)
 async function fetchMarketCap(totalSupply, circulatingSupply) {
     try {
-        const priceUrl = `https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x117c1dabb35ce89c7cb98a49e2355ab445366c23`;
+        const priceUrl = geckoTerminalUrl;
         const priceResponse = await fetch(priceUrl);
         const priceData = await priceResponse.json();
 
@@ -71,6 +77,25 @@ async function fetchMarketCap(totalSupply, circulatingSupply) {
         }
     } catch (error) {
         console.error("Erro ao buscar Market Cap e FDV:", error);
+    }
+}
+
+// ✅ Converter o preço para BNB e ETH
+async function fetchPriceConversions(tokenPriceUSD) {
+    try {
+        const conversionUrl = "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin,ethereum&vs_currencies=usd";
+        const response = await fetch(conversionUrl);
+        const data = await response.json();
+
+        if (data) {
+            const bnbPrice = data.binancecoin.usd;
+            const ethPrice = data.ethereum.usd;
+
+            document.getElementById("tokenPriceBNB").innerText = `${(tokenPriceUSD / bnbPrice).toFixed(8)} BNB`;
+            document.getElementById("tokenPriceETH").innerText = `${(tokenPriceUSD / ethPrice).toFixed(8)} ETH`;
+        }
+    } catch (error) {
+        console.error("Erro ao converter preços:", error);
     }
 }
 
