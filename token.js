@@ -9,8 +9,10 @@ async function fetchTokenData() {
     const burnAddress = "0x000000000000000000000000000000000000dEaD"; // Endereço de queima
 
     try {
-        // 🔹 Buscar Total Supply e Circulating Supply
+        // 🔹 Buscar Total Supply
         const supplyUrl = `https://api.bscscan.com/api?module=stats&action=tokensupply&contractaddress=${contractAddress}&apikey=${apiKey}`;
+        
+        // 🔹 Buscar Total Burned do Endereço Dead
         const burnBalanceUrl = `https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${contractAddress}&address=${burnAddress}&apikey=${apiKey}`;
 
         const [supplyResponse, burnResponse] = await Promise.all([
@@ -21,16 +23,18 @@ async function fetchTokenData() {
         const supplyData = await supplyResponse.json();
         const burnData = await burnResponse.json();
 
-        if (supplyData.status === "1") {
-            const totalSupply = parseFloat(supplyData.result / 1e18);
-            const burnedTokens = parseFloat(burnData.result / 1e18);
-            const circulatingSupply = totalSupply - burnedTokens;
+        if (supplyData.status === "1" && burnData.status === "1") {
+            const totalSupply = parseFloat(supplyData.result / 1e18); // Convertendo de WEI
+            const burnedTokens = parseFloat(burnData.result / 1e18); // Convertendo de WEI
+            const circulatingSupply = totalSupply - burnedTokens; // Cálculo do Supply Circulante
 
             document.getElementById("totalSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("circulatingSupply").innerText = circulatingSupply.toLocaleString();
             document.getElementById("maxSupply").innerText = totalSupply.toLocaleString();
             document.getElementById("burnedTokens").innerText = burnedTokens.toLocaleString();
-            document.getElementById("burnedPercentage").innerText = ((burnedTokens / totalSupply) * 100).toFixed(2) + "%";
+
+            const burnedPercentage = ((burnedTokens / totalSupply) * 100).toFixed(2);
+            document.getElementById("burnedPercentage").innerText = `${burnedPercentage}%`;
 
             // 🔹 Buscar Preço, Market Cap e Volume 24h
             fetchGeckoData(contractAddress, totalSupply, circulatingSupply);
